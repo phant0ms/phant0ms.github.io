@@ -150,6 +150,79 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://phant0ms.github.io/rancher%E5%AE%89%E8%A3%85.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="phant0ms">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="phant0ms的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/rancher%E5%AE%89%E8%A3%85.html" class="post-title-link" itemprop="url">rancher安装</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-12-10 10:01:20 / 修改时间：11:16:48" itemprop="dateCreated datePublished" datetime="2020-12-10T10:01:20+08:00">2020-12-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Rancher是一个开源的企业级容器管理平台。通过Rancher，企业再也不必自己使用一系列的开源软件去从头搭建容器服务平台。Rancher提供了在生产环境中使用的管理Docker和Kubernetes的全栈化容器部署与管理平台。官网：<code>https://rancher.com/</code></p>
+<p>本文基于rancher2.5.1版本进行安装部署。</p>
+<p>如果有网络环境，直接运行下面的命令就可自动安装成功。</p>
+<p><code>sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher</code></p>
+<p>大多时候，我们内网的环境可能是没有网络环境，这个时候就需要离线安装，rancher提供离线安装方式，首先在外网下载好需要用的脚本与docker镜像：<br>下载地址：<a target="_blank" rel="noopener" href="https://github.com/rancher/rancher/releases">https://github.com/rancher/rancher/releases</a></p>
+<p>docker 证书配置：<br><code>docker: Error response from daemon: Get https://x.x.x.x/v2/: x509: cannot validate certificate for x.x.x.x because it doesn&#39;t contain any IP SANs</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mkdir -p certs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> openssl req \</span></span><br><span class="line">  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key \</span><br><span class="line">  -x509 -days 365 -out certs/domain.crt</span><br></pre></td></tr></table></figure>
+<p>证书的CN需要与域名或者ip完全一致<br>复制证书到：<code>etc/docker/certs.d/myregistrydomain.com/ca.crt</code><br>windows服务器上需要安装到受信任的根证书目录</p>
+<p>其它服务器可参考docker官网文档：<br><a target="_blank" rel="noopener" href="https://docs.docker.com/registry/insecure/">https://docs.docker.com/registry/insecure/</a></p>
+<p><code>vim /usr/lib/systemd/system/docker.service</code></p>
+<p>在 <code>ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock</code> 一行后面添加 <code>--insecure-registry==你的ip或者域名</code> </p>
+<p>然后重启docker</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl daemon-reload</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="source/images/../../../images/1.png" alt="ddd"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://phant0ms.github.io/hello-world.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -354,7 +427,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
