@@ -207,14 +207,14 @@
 <h2 id="二、rancher离线安装">二、rancher离线安装</h2>
 <p>本文基于rancher2.5.1版本进行安装部署。</p>
 <p>如果有网络环境，直接运行下面的命令就可自动安装成功。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher</span><br></pre></td></tr></table></figure>
 <p>大多时候，我们内网的环境可能是没有网络环境，这个时候就需要离线安装，rancher提供离线安装方式，首先在外网下载好需要用的脚本与docker镜像：<br>
 下载地址：<a target="_blank" rel="noopener" href="https://github.com/rancher/rancher/releases%EF%BC%8C">https://github.com/rancher/rancher/releases，</a> 推荐下载Stable版本，bug相对较少,不要下载标记为 rc 或 Pre-release 的版本，因为它们在生产环境下是不稳定的。下载好<code>rancher-save-images.sh</code>、<code>rancher-load-images.sh</code> 、<code>rancher-images.txt</code>、三个脚本，脚本执行 <code>./rancher-save-images.sh --image-list ./rancher-images.txt</code>。这个脚本会自动下载rancher需要用的docker镜像。下载完成后将生成的ancher-images.tar.gz与上面的三个脚本一同复制到内网放在同一目录下。</p>
 <blockquote>
 <p>注：里面存在同一镜像多个版本，可保留一个版本即可</p>
 </blockquote>
 <p>去除重复的镜像源：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sort -u rancher-images.txt -o rancher-images.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sort -u rancher-images.txt -o rancher-images.txt</span><br></pre></td></tr></table></figure>
 <table>
 <thead>
 <tr>
@@ -240,21 +240,21 @@
 <p>将打包好的镜像导入到docker中，执行：<br>
 <code>docker load -i rancher.tar</code>。 稍等片刻便会导入成功。</p>
 <p><code>rancher-load-images.sh</code>用于将打包好的镜像导入到docker。导入成功后启动rancher，执行：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher</span><br></pre></td></tr></table></figure>
 <p>稍等片刻访问 <code>https://ipaddress</code>就能进入rancher</p>
 <h2 id="三、使用Harbor配置Docker镜像仓库">三、使用Harbor配置Docker镜像仓库</h2>
 <p>Harbor是企业级镜像仓库，官方地址：<a target="_blank" rel="noopener" href="https://github.com/goharbor/harbor/releases">https://github.com/goharbor/harbor/releases</a><br>
 下载离线安装包：<code>harbor-offline-installer-v2.0.5.tgz</code> 并复制到内网。harbor需要用到证书，先生成自己的证书，证书的CN需要与域名或者ip完全一致：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mkdir -p certs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> openssl req \</span></span><br><span class="line">  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key \</span><br><span class="line">  -x509 -days 365 -out certs/domain.crt</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mkdir -p certs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> openssl req \</span></span><br><span class="line">  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key \</span><br><span class="line">  -x509 -days 365 -out certs/domain.crt</span><br></pre></td></tr></table></figure>
 <p>编辑配置文件harbor.yml, 修改 hostname 域名、https 证书等配置信息,其它的可按需修改：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Configuration file of Harbor</span></span><br><span class="line"><span class="comment"># The IP address or hostname to access admin UI and registry service.</span></span><br><span class="line"><span class="comment"># DO NOT use localhost or 127.0.0.1, because Harbor needs to be accessed by external clients.</span></span><br><span class="line"><span class="attr">hostname:</span> <span class="number">10.10</span><span class="number">.10</span><span class="number">.10</span> <span class="comment"># hostname不能是localhost或127.0.0.1</span></span><br><span class="line"><span class="comment"># http related config</span></span><br><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="comment"># port for http, default is 80. If https enabled, this port will redirect to https port</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"><span class="comment"># https related config</span></span><br><span class="line"><span class="attr">https:</span></span><br><span class="line">  <span class="comment"># https port for harbor, default is 443</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">443</span></span><br><span class="line">  <span class="comment"># The path of cert and key files for nginx</span></span><br><span class="line">  <span class="attr">certificate:</span> <span class="string">/certs/domain.crt</span> <span class="comment"># 证书路径</span></span><br><span class="line">  <span class="attr">private_key:</span> <span class="string">/certs/domain.key</span>  <span class="comment">#私钥路径</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Configuration file of Harbor</span></span><br><span class="line"><span class="comment"># The IP address or hostname to access admin UI and registry service.</span></span><br><span class="line"><span class="comment"># DO NOT use localhost or 127.0.0.1, because Harbor needs to be accessed by external clients.</span></span><br><span class="line"><span class="attr">hostname:</span> <span class="number">10.10</span><span class="number">.10</span><span class="number">.10</span> <span class="comment"># hostname不能是localhost或127.0.0.1</span></span><br><span class="line"><span class="comment"># http related config</span></span><br><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="comment"># port for http, default is 80. If https enabled, this port will redirect to https port</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"><span class="comment"># https related config</span></span><br><span class="line"><span class="attr">https:</span></span><br><span class="line">  <span class="comment"># https port for harbor, default is 443</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">443</span></span><br><span class="line">  <span class="comment"># The path of cert and key files for nginx</span></span><br><span class="line">  <span class="attr">certificate:</span> <span class="string">/certs/domain.crt</span> <span class="comment"># 证书路径</span></span><br><span class="line">  <span class="attr">private_key:</span> <span class="string">/certs/domain.key</span>  <span class="comment">#私钥路径</span></span><br></pre></td></tr></table></figure>
 <p>接着执行如下命令进行安装：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./install.sh --with-clair</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./install.sh --with-clair</span></span><br></pre></td></tr></table></figure>
 <p>–with-clair 指定安装 Clair 服务，一个用户镜像漏洞静态分析的工具。如果不需要，可以省略该选项。</p>
 <p>安装成功后, 可通过https://ipadress来访问web UI .默认的账号密码是<code>admin/Harbor12345</code></p>
 <h2 id="四、推送镜像到私仓">四、推送镜像到私仓</h2>
 <p>推送之前需要先登录，使用<code>docker login</code>命令，如下。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker login 10.10.10.10</span></span><br><span class="line">Username: admin</span><br><span class="line">Password: Harbor12345</span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker login 10.10.10.10</span></span><br><span class="line">Username: admin</span><br><span class="line">Password: Harbor12345</span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
 <p>因为我们用的自签证书，docker可能会提示证书不受信，需要配置docker信任我们的自签证书</p>
 <p>1、复制证书到：<code>etc/docker/certs.d/10.10.10.10/ca.crt</code> , 其中文件夹<br>
 <code>10.10.10.10</code>需要根据实际ip地址或者域名填写。</p>
@@ -265,14 +265,14 @@
 <p>其它服务器可参考docker官网文档：<a target="_blank" rel="noopener" href="https://docs.docker.com/registry/insecure/">https://docs.docker.com/registry/insecure/</a></p>
 </blockquote>
 <p>如果提示：</p>
-<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker: Error response from daemon: Get https://x.x.x.x/v2/: x509: cannot validate certificate for x.x.x.x because it doesn&#x27;t contain any IP SANs</span><br></pre></td></tr></table></figure>
+<figure class="highlight tex"><table><tr><td class="code"><pre><span class="line">docker: Error response from daemon: Get https://x.x.x.x/v2/: x509: cannot validate certificate for x.x.x.x because it doesn&#x27;t contain any IP SANs</span><br></pre></td></tr></table></figure>
 <p>简单的方案是加入<code>--insecure-registry</code>参数:</p>
 <p><code>vim /usr/lib/systemd/system/docker.service</code></p>
 <p>在 <code>ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock</code> 一行后面添加 <code>--insecure-registry==你的ip或者域名</code></p>
 <p>然后重启docker</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl daemon-reload</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl daemon-reload</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl restart docker</span></span><br></pre></td></tr></table></figure>
 <p>使用<code>rancher-load-images.sh</code>将下载好的镜像导入到私仓</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./rancher-load-images.sh --image-list ./rancher-images.txt --registry &lt;REGISTRY.YOURDOMAIN.COM:PORT&gt;`</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./rancher-load-images.sh --image-list ./rancher-images.txt --registry &lt;REGISTRY.YOURDOMAIN.COM:PORT&gt;`</span><br></pre></td></tr></table></figure>
 <p><code>&lt;REGISTRY.YOURDOMAIN.COM:PORT&gt;</code>是harbor的地址，443可以不用填写</p>
 <h2 id="五、rancher集群配置">五、rancher集群配置</h2>
 <p>rancher 默认创建了local集群，里面有两个项目，一个system，一个default。关于命令空间与项目，可访问https://docs.rancher.cn/docs/rancher2/cluster-admin/projects-and-namespaces/_index/ 官网查看详细解释。官方不推荐去操作local集群里面的服务。所以我们新建一个集群。</p>
@@ -291,13 +291,6 @@
 
 
         
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/rancher-harbor-offline-install-configure.html" rel="prev" title="ranche离线安装与配置">
-      <i class="fa fa-chevron-left"></i> ranche离线安装与配置
-    </a></div>
-      <div class="post-nav-item"></div>
-    </div>
       </footer>
     
   </article>
@@ -369,7 +362,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">1</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
